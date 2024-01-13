@@ -5,6 +5,7 @@ const puerto = process.env.PORT;
 // Sin esta linea cuando se suba a produccion no funcionaria.
 const cors = require('cors');
 const productRoutes = require('./routes/product.routes');
+const userRoutes = require('./routes/user.routes');
 const { dbConnection } = require('./database/config');
 // Middleware's
 app.use(cors());
@@ -17,6 +18,7 @@ app.use(express.json());
     await dbConnection();
     // Carga de rutas
     app.use(productRoutes);
+    app.use(userRoutes);
 
 })();
 

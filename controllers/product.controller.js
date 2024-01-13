@@ -24,11 +24,17 @@ const productsPost = async (req = request, res = response) => {
     });
 }
 
-const productsPut = (req = request, res = response) => {
-    // Tarea
-    //  Realizar el put(actualizacion de registro)
-    // Crear modelo, rutas y controller de usuarios.
-    res.send('PUT /products');
+const productsPut = async (req = request, res = response) => {
+    const {id} = req.query;
+    const productToEdit = req.body;
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, productToEdit, {new: true});
+
+
+    res.status(200).json({
+        message:"Producto actualizado",
+        data: updatedProduct
+    });
 }
 
 const productsDelete = async (req = request, res = response) => {
