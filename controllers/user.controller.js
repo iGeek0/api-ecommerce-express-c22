@@ -41,12 +41,21 @@ const usersPut = async (req = request, res = response) => {
     const  id  = req.user.id;
     const userToEdit = req.body;
 
+    if (userToEdit.password != null && userToEdit.password != "") {
+        // hacer lo necesario....CORRRECTO
+        userToEdit.password = await bcrypt.hash(userToEdit.password, salt);
+    } else {
+        delete userToEdit.password;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(id, userToEdit, { new: true });
 
 
     res.status(200).json({
         message: "Usuario actualizado",
-        data: updatedUser
+        data: updatedUser,
+        id: id,
+        userToEdit: userToEdit
     });
 }
 
@@ -69,6 +78,7 @@ const loginPost = async (req = request, res = response) => {
             message: "User not found or not active.",
             data: "null"
         });
+        return;
     }
 
     // Aqui comparamos la password de db contra la del usuario plana
@@ -79,6 +89,7 @@ const loginPost = async (req = request, res = response) => {
             message: "Invalid Password",
             data: "null"
         });
+        return;
     }
 
     const payload = {
