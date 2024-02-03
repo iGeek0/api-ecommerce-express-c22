@@ -6,11 +6,18 @@ const salt = 10;
 
 const usersGet = async (req = request, res = response) => {
 
-    const users = await User.find();
+    const tokenInfo = req.user;
+    const profileRaw = await User.findById(tokenInfo.id);
+    const profile = {
+        name: profileRaw.name,
+        last_name: profileRaw.last_name,
+        email: profileRaw.email,
+        dob: profileRaw.dob,
+    }
 
     res.status(200).json({
         message: "Datos cargados correctamente",
-        data: users
+        data: profile
     });
 
 }
@@ -31,8 +38,15 @@ const usersPost = async (req = request, res = response) => {
 }
 
 const usersPut = async (req = request, res = response) => {
-    const { id } = req.query;
+    const id = req.user.id;
     const userToEdit = req.body;
+
+    if (userToEdit.password != null && userToEdit.password != "") {
+        console.log([userToEdit.password, salt]);
+        userToEdit.password = await bcrypt.hash(userToEdit.password, salt);
+    } else {
+        delete userToEdit.password;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(id, userToEdit, { new: true });
 
@@ -62,6 +76,7 @@ const loginPost = async (req = request, res = response) => {
             message: "User not found or not active.",
             data: "null"
         });
+        return;
     }
 
     // Aqui comparamos la password de db contra la del usuario plana
@@ -72,9 +87,11 @@ const loginPost = async (req = request, res = response) => {
             message: "Invalid Password",
             data: "null"
         });
+        return;
     }
 
     const payload = {
+        id: userInformationDb._id,
         full_name: `${userInformationDb.name} ${userInformationDb.last_name}`,
         email: userInformationDb.email
     };
